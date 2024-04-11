@@ -1,5 +1,9 @@
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { auth, db } from "../../lib/firebase";
+import upload from "../../lib/upload";
 import "./login.css";
 
 function Login() {
@@ -19,6 +23,33 @@ function Login() {
     toast.success("Login Success");
   };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const { username, email, password } = Object.fromEntries(formData);
+
+    try {
+      const res = await createUserWithEmailAndPassword(auth, email, password);
+      const imgUrl = await upload(avatar.file);
+
+      await setDoc(doc(db, "users", res.user.uid), {
+        username,
+        email,
+        id: res.user.uid,
+        blocked: [],
+      });
+
+      await setDoc(doc(db, "userchats", res.user.uid), {
+        chats: [],
+      });
+
+      toast.success("Account created successfully! You can now sign in.");
+    } catch (err) {
+      console.log(err);
+      toast.error(err.message);
+    }
+  };
+
   return (
     <div className="login">
       <div className="item">
@@ -32,7 +63,7 @@ function Login() {
       <div className="separator"></div>
       <div className="item">
         <h2>Create an Account </h2>
-        <form>
+        <form onSubmit={handleRegister}>
           <label htmlFor="file">
             <img src={avatar.url || "./avatar.png"} alt="" />
             Upload an image
@@ -44,13 +75,8 @@ function Login() {
             onChange={handleAvatar}
           />
           <input type="text" name="username" placeholder="User Name" />
-          <input type="email" name="newemail" placeholder="Email" />
-          <input
-            type="password"
-            name="newpassword"
-            placeholder="Password"
-            id=""
-          />
+          <input type="email" name="email" placeholder="Email" />
+          <input type="password" name="password" placeholder="Password" id="" />
           <button>Sign Up</button>
         </form>
       </div>
