@@ -53,6 +53,41 @@ function Chatlist() {
           <p>Last message</p>
         </div>
       </div>
+      <div className="item">
+        <img src="./avatar.png" alt="" />
+        <div className="texts">
+          <span>User Name 2</span>
+          <p>Last message</p>
+        </div>
+      </div>
+      <div className="item">
+        <img src="./avatar.png" alt="" />
+        <div className="texts">
+          <span>User Name 2</span>
+          <p>Last message</p>
+        </div>
+      </div>
+      <div className="item">
+        <img src="./avatar.png" alt="" />
+        <div className="texts">
+          <span>User Name 2</span>
+          <p>Last message</p>
+        </div>
+      </div>
+      <div className="item">
+        <img src="./avatar.png" alt="" />
+        <div className="texts">
+          <span>User Name 2</span>
+          <p>Last message</p>
+        </div>
+      </div>
+      <div className="item">
+        <img src="./avatar.png" alt="" />
+        <div className="texts">
+          <span>User Name 2</span>
+          <p>Last message</p>
+        </div>
+      </div>
     </div>
   );
 }
