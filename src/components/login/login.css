@@ -52,7 +52,15 @@
         background-color: #1f8ef1;
         color: white;
         cursor: pointer;
+        border-radius: 5px;
+        font-weight: 500;
       }
     }
+  }
+
+  .separator {
+    width: 2px;
+    height: 80%;
+    background-color: #dddddd35;
   }
 }
