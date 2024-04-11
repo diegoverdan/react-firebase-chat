@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import AddUser from "./addUser/addUser";
 import "./chatlist.css";
 
 function Chatlist() {
@@ -88,6 +89,7 @@ function Chatlist() {
           <p>Last message</p>
         </div>
       </div>
+      {addMode && <AddUser />}
     </div>
   );
 }

@@ -9,7 +9,7 @@ function AddUser() {
         <button>Search</button>
       </form>
       <div className="user">
-        <div className="detail">
+        <div className="detail-adduser">
           <img src="./avatar.png" alt="" />
           <span>Jane Doe</span>
         </div>

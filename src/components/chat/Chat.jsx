@@ -124,6 +124,7 @@ function Chat() {
           <img onClick={() => setEmoji(!emoji)} src="./emoji.png" alt="" />
           <div className="picker">
             <EmojiPicker
+              theme="dark"
               searchPlaceHolder="Search"
               open={emoji}
               onEmojiClick={handleEmojiClick}
