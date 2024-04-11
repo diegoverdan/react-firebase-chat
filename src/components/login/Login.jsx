@@ -1,4 +1,7 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
@@ -8,6 +11,7 @@ import "./login.css";
 
 function Login() {
   const [avatar, setAvatar] = useState({ file: null, url: "" });
+  const [loading, setLoading] = useState(false);
 
   const handleAvatar = (e) => {
     if (e.target.files[0]) {
@@ -18,13 +22,27 @@ function Login() {
     }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    toast.success("Login Success");
+    setLoading(true);
+
+    const formData = new FormData(e.target);
+    const { email, password } = Object.fromEntries(formData);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success("Login Success");
+    } catch (err) {
+      console.log(err);
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const formData = new FormData(e.target);
     const { username, email, password } = Object.fromEntries(formData);
 
@@ -35,6 +53,7 @@ function Login() {
       await setDoc(doc(db, "users", res.user.uid), {
         username,
         email,
+        avatar: imgUrl,
         id: res.user.uid,
         blocked: [],
       });
@@ -47,6 +66,8 @@ function Login() {
     } catch (err) {
       console.log(err);
       toast.error(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,7 +78,9 @@ function Login() {
         <form onSubmit={handleLogin}>
           <input type="email" name="email" placeholder="Email" />
           <input type="password" name="password" placeholder="Password" />
-          <button>Sign In</button>
+          <button disabled={loading}>
+            {loading ? "Loading..." : "Sign In"}
+          </button>
         </form>
       </div>
       <div className="separator"></div>
@@ -77,7 +100,9 @@ function Login() {
           <input type="text" name="username" placeholder="User Name" />
           <input type="email" name="email" placeholder="Email" />
           <input type="password" name="password" placeholder="Password" id="" />
-          <button>Sign Up</button>
+          <button disabled={loading}>
+            {loading ? "Loading..." : "Sign Up"}
+          </button>
         </form>
       </div>
     </div>
