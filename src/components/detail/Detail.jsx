@@ -77,6 +77,7 @@ function Detail() {
           </div>
         </div>
         <button>Block User</button>
+        <button className="logoutBtn">Logout</button>
       </div>
     </div>
   );
