@@ -1,4 +1,6 @@
+import { updateDoc } from "firebase/firestore";
 import React from "react";
+import { toast } from "react-toastify";
 import { useChatStore } from "../../lib/chatStore";
 import { auth } from "../../lib/firebase";
 import { useUserStore } from "../../lib/userStore";
@@ -9,7 +11,21 @@ function Detail() {
     useChatStore();
   const { currentUser } = useUserStore();
 
-  const handleBlock = () => {};
+  const handleBlock = async () => {
+    if (!user) return;
+
+    const userDocRef = doc(db, "users", currentUser.id);
+
+    try {
+      await updateDoc(userDocRef, {
+        blocked: isReceiverBlocked ? arrayRemove(user.id) : arrayUnion(user.id),
+      });
+      changeBlock();
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   return (
     <div className="detail">
       <div className="user">
@@ -84,7 +100,13 @@ function Detail() {
             <img src="./arrowUp.png" alt="" />
           </div>
         </div>
-        <button onClick={handleBlock}>Block User</button>
+        <button onClick={handleBlock}>
+          {isCurrentUserBlocked
+            ? "You are blocked!"
+            : isReceiverBlocked
+            ? "User Blocked"
+            : "Block User"}
+        </button>
         <button className="logoutBtn" onClick={() => auth.signOut()}>
           Logout
         </button>

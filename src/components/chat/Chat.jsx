@@ -23,7 +23,8 @@ function Chat() {
     url: "",
   });
 
-  const { chatId, user } = useChatStore();
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
+    useChatStore();
   const { currentUser } = useUserStore();
   const endRef = useRef(null);
 
@@ -169,7 +170,12 @@ function Chat() {
           onChange={(e) => setText(e.target.value)}
           value={text}
           type="text"
-          placeholder="Digite uma mensagem..."
+          placeholder={
+            isCurrentUserBlocked || isReceiverBlocked
+              ? "Não pode enviar mensagens"
+              : "Digite uma mensagem..."
+          }
+          disabled={isCurrentUserBlocked || isReceiverBlocked}
         />
         <div className="emoji">
           <img onClick={() => setEmoji(!emoji)} src="./emoji.png" alt="" />
@@ -182,7 +188,11 @@ function Chat() {
             />
           </div>
         </div>
-        <button onClick={handleSend} className="sendButton">
+        <button
+          onClick={handleSend}
+          className="sendButton"
+          disabled={isCurrentUserBlocked || isReceiverBlocked}
+        >
           Enviar
         </button>
       </div>
