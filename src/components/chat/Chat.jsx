@@ -1,8 +1,16 @@
 import EmojiPicker from "emoji-picker-react";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { useChatStore } from "../../lib/chatStore";
 import { db } from "../../lib/firebase";
+import { useUserStore } from "../../lib/userStore";
 import "./chat.css";
 
 function Chat() {
@@ -10,7 +18,8 @@ function Chat() {
   const [emoji, setEmoji] = useState(false);
   const [text, setText] = useState("");
   const endRef = useRef(null);
-  const { chatId } = useChatStore();
+  const { chatId, user } = useChatStore();
+  const { currentUser } = useUserStore();
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -26,11 +35,52 @@ function Chat() {
     };
   }, [chatId]);
 
-  console.log(chat);
-
   const handleEmojiClick = (e) => {
     setText((prev) => prev + e.emoji);
     setEmoji(false);
+  };
+
+  const handleSend = async () => {
+    if (text === "") return;
+
+    try {
+      await updateDoc(doc(db, "chats", chatId), {
+        messages: arrayUnion({
+          senderId: currentUser.id,
+          text,
+          createdAt: new Date(),
+        }),
+      });
+
+      const userIDs = [currentUser.id, user.id];
+
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(db, "userchats", id);
+        const userChatsSnapshot = await getDoc(userChatsRef);
+
+        if (userChatsSnapshot.exists()) {
+          const userChatData = userChatsSnapshot.data();
+
+          const chatIndex = userChatData.chats.findIndex(
+            (c) => c.chatId === chatId
+          );
+
+          userChatData.chats[chatIndex].lastMessage = text;
+          userChatData.chats[chatIndex].isSeen =
+            id === currentUser.id ? true : false;
+          userChatData.chats[chatIndex].updatedAt = Date.now();
+
+          await updateDoc(userChatsRef, {
+            chats: userChatData.chats,
+          });
+        }
+      });
+
+      setText("");
+      endRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -49,82 +99,20 @@ function Chat() {
           <img src="./info.png" alt="" />
         </div>
       </div>
+
       <div className="center">
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
-              dolorem laboriosam fuga dolore nostrum recusandae error omnis
-              voluptate doloribus sunt autem corporis nihil, corrupti quia
-              accusamus nesciunt ab sed et?
-            </p>
-            <span>1 min ago</span>
+        {chat?.messages?.map((message) => (
+          <div className="message own" key={message?.createdAt}>
+            <div className="texts">
+              {message.img && <img src={message.img} alt="" />}
+              <p>{message.text}</p>
+              {/* <span>1 min ago</span> */}
+            </div>
           </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <p>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
-              dolorem laboriosam fuga dolore nostrum recusandae error omnis
-              voluptate doloribus sunt autem corporis nihil, corrupti quia
-              accusamus nesciunt ab sed et?
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
-              dolorem laboriosam fuga dolore nostrum recusandae error omnis
-              voluptate doloribus sunt autem corporis nihil, corrupti quia
-              accusamus nesciunt ab sed et?
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <p>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
-              dolorem laboriosam fuga dolore nostrum recusandae error omnis
-              voluptate doloribus sunt autem corporis nihil, corrupti quia
-              accusamus nesciunt ab sed et?
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
-              dolorem laboriosam fuga dolore nostrum recusandae error omnis
-              voluptate doloribus sunt autem corporis nihil, corrupti quia
-              accusamus nesciunt ab sed et?
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <img
-              src="https://hips.hearstapps.com/hmg-prod/images/nature-quotes-landscape-1648265299.jpg?crop=1.00xw:0.760xh;0,0.0587xh&resize=1200:*"
-              alt=""
-            />
-            <p>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
-              dolorem laboriosam fuga dolore nostrum recusandae error omnis
-              voluptate doloribus sunt autem corporis nihil, corrupti quia
-              accusamus nesciunt ab sed et?
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
+        ))}
         <div ref={endRef}></div>
       </div>
+
       <div className="botton">
         <div className="icons">
           <img src="./img.png" alt="" />
@@ -135,20 +123,22 @@ function Chat() {
           onChange={(e) => setText(e.target.value)}
           value={text}
           type="text"
-          placeholder="Type a message..."
+          placeholder="Digite uma mensagem..."
         />
         <div className="emoji">
           <img onClick={() => setEmoji(!emoji)} src="./emoji.png" alt="" />
           <div className="picker">
             <EmojiPicker
               theme="dark"
-              searchPlaceHolder="Search"
+              searchPlaceHolder="Pesquisar"
               open={emoji}
               onEmojiClick={handleEmojiClick}
             />
           </div>
         </div>
-        <button className="sendButton">Send</button>
+        <button onClick={handleSend} className="sendButton">
+          Enviar
+        </button>
       </div>
     </div>
   );

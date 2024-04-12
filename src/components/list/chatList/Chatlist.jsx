@@ -47,7 +47,7 @@ function Chatlist() {
       <div className="search">
         <div className="searchBar">
           <img src="./search.png" alt="" />
-          <input type="text" placeholder="Search..." />
+          <input type="text" placeholder="Pesquisar..." />
         </div>
         <img
           className="add"

@@ -71,7 +71,7 @@ function AddUser() {
         }),
       });
 
-      console.log(newChatRef.id);
+      //console.log(newChatRef.id);
     } catch (error) {
       console.log(error);
       toast.error(error.message);
@@ -81,8 +81,8 @@ function AddUser() {
   return (
     <div className="addUser">
       <form onSubmit={handleSearch}>
-        <input type="text" name="username" placeholder="Username" />
-        <button>Search</button>
+        <input type="text" name="username" placeholder="Nome do Usuário" />
+        <button>Pesquisar</button>
       </form>
       {user && (
         <div className="user">
@@ -90,7 +90,7 @@ function AddUser() {
             <img src={user.avatar || "./avatar.png"} alt="" />
             <span>{user.username}</span>
           </div>
-          <button onClick={handleAdd}>Add User</button>
+          <button onClick={handleAdd}>Adic. Usuário</button>
         </div>
       )}
     </div>
