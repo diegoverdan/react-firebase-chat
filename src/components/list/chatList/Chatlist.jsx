@@ -1,4 +1,4 @@
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { useUserStore } from "../../../lib/userStore";
@@ -53,9 +53,9 @@ function Chatlist() {
 
       {chats.map((chat) => (
         <div className="item" key={chat.chatId}>
-          <img src="./avatar.png" alt="" />
+          <img src={chat.user.avatar || "./avatar.png"} alt="" />
           <div className="texts">
-            <span>User Name 2</span>
+            <span>{chat.user.username}</span>
             <p>{chat.lastMessage}</p>
           </div>
         </div>
