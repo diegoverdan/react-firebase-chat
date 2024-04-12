@@ -1,8 +1,13 @@
 import React from "react";
+import { useChatStore } from "../../lib/chatStore";
 import { auth } from "../../lib/firebase";
 import "./detail.css";
 
 function Detail() {
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock } =
+    useChatStore();
+
+  const handleBlock = () => {};
   return (
     <div className="detail">
       <div className="user">
@@ -77,7 +82,7 @@ function Detail() {
             <img src="./arrowUp.png" alt="" />
           </div>
         </div>
-        <button>Block User</button>
+        <button onClick={handleBlock}>Block User</button>
         <button className="logoutBtn" onClick={() => auth.signOut()}>
           Logout
         </button>
